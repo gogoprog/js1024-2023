@@ -2,15 +2,17 @@ default: build
 
 compile:
 	haxe build.hxml
-	sed '1d' -i temp/main.js
-	sed '1d' -i temp/main.js
-	sed '1d' -i temp/main.js
-	for i in {1..14}; do sed '$$d' -i temp/main.js; done
 
-build: compile
+run: compile
+	python temp/main.py
+
+build: run
 	mkdir -p build
+	cp temp/out.frag temp/final.frag
+	for i in {1..29}; do sed '1d' -i temp/final.frag; done
+	for i in {1..4}; do sed '$$d' -i temp/final.frag; done
 	cat src/before.html > build/index.html
-	cat temp/main.js >> build/index.html
+	cat temp/final.frag >> build/index.html
 	cat src/after.html >> build/index.html
 
 retail: compile

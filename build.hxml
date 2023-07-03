@@ -1,5 +1,5 @@
 -cp src
--js temp/main.js
+-python temp/main.py
 -main Main
--dce full
--D js_classic
+-lib hgsl
+

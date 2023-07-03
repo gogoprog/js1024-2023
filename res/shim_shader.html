@@ -42,10 +42,10 @@ onload = function(){
   with(g){
     (oninput=function(){
       p=cP();
-      sS(s=cS(35633),"attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}");
+      sS(s=cS(35633),"attribute vec2 p; \n void main(){gl_Position=vec4(p,0,1);}");
       ce(s);
       aS(p,s);
-      sS(s=cS(FN),'precision mediump float;uniform float iTime,iFrame,iDate,iTimeDelta;varying lowp vec4 fragCoord;uniform vec2 iResolution;uniform vec4 iMouse;'+shader.innerText+'void main(){mainImage(gl_FragColor,gl_FragCoord.xy);gl_FragColor.w=1.;}');
+      sS(s=cS(FN),'precision mediump float;uniform float iTime,iFrame,iDate,iTimeDelta;varying lowp vec4 fragCoord;uniform vec2 iResolution;uniform vec4 iMouse; '+shader.innerText+' void main(){mainImage(gl_FragColor,gl_FragCoord.xy);gl_FragColor.w=1.;}');
       ce(s);
       aS(p,s);
       lo(p);
@@ -84,5 +84,19 @@ onload = function(){
 }
 </script>
 <script id=shader type="x-shader/x-fragment">
-void mainImage(out vec4 fragColor, vec2 fragCoord) {
+// Shader inputs:
+// - iResolution: vec2(w, h)
+// - iTime: float
+// - iTimeDelta: float
+// - iFrame: int
+// - iMouse: vec4(x, y, clickx, clicky)
+// - iDate: float
 
+// Your entry goes here 👇 (GLSL fragment shader)
+// ==============================================
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    // ...   
+}
+// ==============================================
+</script>
+</body>
