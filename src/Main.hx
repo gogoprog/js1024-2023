@@ -26,6 +26,15 @@ class MyShader extends ShaderMain {
         mainImage(oColor, vTexCoord);
     }
 
+    final lightPosition = vec3(0.0, 1.0, -5.0);
+
+    final spherePositions:Array<Vec3, 4> = [
+            vec3(0.0, 5.0, -10.0),
+            vec3(0.0, 0.0, -10.0),
+            vec3(7.0, -7.0, -10.0),
+            vec3(0.0, 8.0, -10.0)
+                                           ];
+
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
         // fragColor = vec4(iMouse.x / iResolution.x, 1.0, sin(iTime * 0.1), 1.0);
 
@@ -36,17 +45,20 @@ class MyShader extends ShaderMain {
         var cameraDirection = vec3(uv, -1.0);
 
         // Ray tracing
-        var sphere_position = vec3(0.0, 0.0, -10.0);
         var sphere_radius = 1.0;
-        var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
 
-        if(t > 0.0) {
-            // Sphere intersection, set pixel color to red
-            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        } else {
-            // No intersection, set pixel color to black
-            fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        for(i in 0...4) {
+            var sphere_position = spherePositions[i];
+            var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
+
+            if(t > 0.0) {
+                // Sphere intersection, set pixel color to red
+                fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                return;
+            }
         }
+
+        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
 
     function intersectSphere(ray_origin:Vec3, ray_direction:Vec3, sphere_position:Vec3, sphere_radius:Float):Float {
