@@ -28,21 +28,19 @@ class MyShader extends ShaderMain {
 
     final lightPosition = vec3(0.0, 1.0, -5.0);
 
-    final spherePositions:Array<Vec3, 4> = [
-            vec3(0.0, 5.0, -10.0),
-            vec3(0.0, 0.0, -10.0),
-            vec3(7.0, -7.0, -10.0),
-            vec3(0.0, 8.0, -10.0)
-                                           ];
-
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
-        // fragColor = vec4(iMouse.x / iResolution.x, 1.0, sin(iTime * 0.1), 1.0);
+
+        var spherePositions:Array<Vec3, 4>;
+        spherePositions[0] = vec3(0.0, 5.0, -10.0);
+        spherePositions[1] = vec3(-2.0, 0.0, -10.0);
+        spherePositions[2] = vec3(10 * sin(iTime), -1.0, -10.0);
+        spherePositions[3] = vec3(0.0, -6.0, -10.0);
 
         var uv = (2.0 * fragCoord - iResolution) / min(iResolution.x, iResolution.y);
 
         // Camera setup
         var cameraPosition = vec3(0.0, 0.0, 0.0);
-        var cameraDirection = vec3(uv, -1.0);
+        var cameraDirection = normalize(vec3(uv, -1.0));
 
         // Ray tracing
         var sphere_radius = 1.0;
@@ -52,8 +50,12 @@ class MyShader extends ShaderMain {
             var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
 
             if(t > 0.0) {
-                // Sphere intersection, set pixel color to red
-                fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                var pos = cameraPosition + cameraDirection * t;
+                var normal = normalize(pos - sphere_position);
+                // fragColor = vec4(0.1 + (0.5 + normal.z), 0.0, 0.0, 1.0);
+                var color = normal * 0.5 + vec3(0.5, 0.5, 0.5);
+                // fragColor = vec4(color.x,color.y, color.z , 1.0);
+                fragColor = vec4(color.zzz, 1.0);
                 return;
             }
         }
