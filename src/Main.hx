@@ -31,15 +31,16 @@ class MyShader extends ShaderMain {
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
 
         var spherePositions:Array<Vec3, 4>;
+
         spherePositions[0] = vec3(0.0, 5.0, -10.0);
         spherePositions[1] = vec3(-2.0, 0.0, -10.0);
         spherePositions[2] = vec3(10 * sin(iTime), -1.0, -10.0);
         spherePositions[3] = vec3(0.0, -6.0, -10.0);
 
-        var uv = (2.0 * fragCoord - iResolution) / min(iResolution.x, iResolution.y);
+        var uv = (fragCoord - 0.5 * iResolution) / iResolution.y;
 
         // Camera setup
-        var cameraPosition = vec3(0.0, 0.0, 0.0);
+        var cameraPosition = vec3(0.0, 0.0, 10.0);
         var cameraDirection = normalize(vec3(uv, -1.0));
 
         // Ray tracing
@@ -52,10 +53,12 @@ class MyShader extends ShaderMain {
             if(t > 0.0) {
                 var pos = cameraPosition + cameraDirection * t;
                 var normal = normalize(pos - sphere_position);
+
+                var d = dot(cameraDirection, normal) * -1.0;
                 // fragColor = vec4(0.1 + (0.5 + normal.z), 0.0, 0.0, 1.0);
                 var color = normal * 0.5 + vec3(0.5, 0.5, 0.5);
                 // fragColor = vec4(color.x,color.y, color.z , 1.0);
-                fragColor = vec4(color.zzz, 1.0);
+                fragColor = vec4(d,d,d, 1.0);
                 return;
             }
         }
