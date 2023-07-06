@@ -30,40 +30,94 @@ class MyShader extends ShaderMain {
 
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
 
-        var spherePositions:Array<Vec3, 4>;
 
-        spherePositions[0] = vec3(0.0, 5.0, -10.0);
-        spherePositions[1] = vec3(-2.0, 0.0, -10.0);
-        spherePositions[2] = vec3(10 * sin(iTime), -1.0, -10.0);
-        spherePositions[3] = vec3(0.0, -6.0, -10.0);
+        var spherePositions:Array<Vec3, 22>;
+        final d = 1.0;
+        final z = -18.0;
+
+        spherePositions[0] = vec3(d * 0, d * 2, z);
+        spherePositions[1] = vec3(d * 0, d * 1, z);
+        spherePositions[2] = vec3(d * 0, d * 0, z);
+        spherePositions[3] = vec3(d * 1, d * 0, z);
+
+        spherePositions[4] = vec3(d * 3, d * 2, z);
+        spherePositions[5] = vec3(d * 3, d * 1, z);
+        spherePositions[6] = vec3(d * 3, d * 0, z);
+        spherePositions[7] = vec3(d * 4, d * 0, z);
+        spherePositions[8] = vec3(d * 5, d * 0, z);
+        spherePositions[9] = vec3(d * 5, d * 1, z);
+        spherePositions[10] = vec3(d * 5, d * 2, z);
+
+        spherePositions[11] = vec3(d * 7, d * 2, z);
+        spherePositions[12] = vec3(d * 8, d * 2, z);
+        spherePositions[13] = vec3(d * 7, d * 1, z);
+        spherePositions[14] = vec3(d * 7, d * 0, z);
+        spherePositions[15] = vec3(d * 8, d * 0, z);
+
+        spherePositions[16] = vec3(d * 10, d * 2, z);
+        spherePositions[17] = vec3(d * 12, d * 2, z);
+        spherePositions[18] = vec3(d * 10, d * 1, z);
+        spherePositions[19] = vec3(d * 11, d * 1, z);
+        spherePositions[20] = vec3(d * 10, d * 0, z);
+        spherePositions[21] = vec3(d * 12, d * 0, z);
 
         var uv = (fragCoord - 0.5 * iResolution) / iResolution.y;
 
-        // Camera setup
-        var cameraPosition = vec3(0.0, 0.0, 10.0);
+        var cameraPosition = vec3(6.0, 4.0, 0.0);
         var cameraDirection = normalize(vec3(uv, -1.0));
+        var sphere_radius = 0.45;
 
-        // Ray tracing
-        var sphere_radius = 1.0;
+        var col:Vec3 = vec3(0, 0, 0);
+        var origin = cameraPosition;
+        var direction = cameraDirection;
+        var t = 1.0;
+        var collides = false;
 
-        for(i in 0...4) {
-            var sphere_position = spherePositions[i];
-            var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
+        for(i in 0...10) {
+            for(i in 0...22) {
+                var sphere_position = spherePositions[i];
+                sphere_position.z = z + sin((iTime + i*0.1)* 5) * 1.0;
+                var t = intersectSphere(origin, direction, sphere_position, sphere_radius);
 
-            if(t > 0.0) {
-                var pos = cameraPosition + cameraDirection * t;
-                var normal = normalize(pos - sphere_position);
+                if(t > 0.01) {
+                    origin = origin + direction * t;
+                    var normal = normalize(origin - sphere_position);
+                    direction = reflect(direction, normal);
+                    var d = dot(cameraDirection, normal) * -1.0;
+                    col.x += 0.4 * d;
+                    collides = true;
+                    break;
+                }
+            }
 
-                var d = dot(cameraDirection, normal) * -1.0;
-                // fragColor = vec4(0.1 + (0.5 + normal.z), 0.0, 0.0, 1.0);
-                var color = normal * 0.5 + vec3(0.5, 0.5, 0.5);
-                // fragColor = vec4(color.x,color.y, color.z , 1.0);
-                fragColor = vec4(d,d,d, 1.0);
-                return;
+            if(t > 0.01) {
+            } else {
+                break;
             }
         }
 
-        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+        if(collides) {
+            fragColor = vec4(col, 1.0);
+            return;
+        }
+
+        // for(i in 0...22) {
+        //     var sphere_position = spherePositions[i];
+        //     sphere_position.z += sin((iTime + i*0.1)* 5) * 1.0;
+        //     var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
+        //     if(t > 0.0) {
+        //         var pos = cameraPosition + cameraDirection * t;
+        //         var normal = normalize(pos - sphere_position);
+        //         var d = dot(cameraDirection, normal) * -1.0;
+        //         // fragColor = vec4(0.1 + (0.5 + normal.z), 0.0, 0.0, 1.0);
+        //         var color = normal * 0.5 + vec3(0.5, 0.5, 0.5);
+        //         // fragColor = vec4(color.x,color.y, color.z , 1.0);
+        //         fragColor = vec4(d, d, d, 1.0);
+        //         return;
+        //     }
+        // }
+
+        fragColor = vec4(0.1, 0.2 + uv.y * 0.2, 0.3 + uv.x * 0.2, 1.0);
     }
 
     function intersectSphere(ray_origin:Vec3, ray_direction:Vec3, sphere_position:Vec3, sphere_radius:Float):Float {

@@ -9,7 +9,7 @@ run: compile
 build: run
 	mkdir -p build
 	cp temp/out.frag temp/final.frag
-	for i in {1..28}; do sed '1d' -i temp/final.frag; done
+	for i in {1..27}; do sed '1d' -i temp/final.frag; done
 	for i in {1..4}; do sed '$$d' -i temp/final.frag; done
 	sed -i 's/vec4 fragColor/out vec4 fragColor/' temp/final.frag
 	cat src/before.html > build/index.html
