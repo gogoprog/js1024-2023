@@ -28,47 +28,47 @@ class MyShader extends ShaderMain {
 
     final lightPosition = vec3(0.0, 1.0, -5.0);
 
+    function v(x:Int, y:Int):Vec3 {
+        return vec3(x, y, 0);
+    }
+
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
 
         var spherePositions:Array<Vec3, 22>;
-        final d = 1.0;
-        final z = -15.0;
+        final d = 1;
 
-        spherePositions[0] = vec3(d * 0, d * 2, z);
-        spherePositions[1] = vec3(d * 0, d * 1, z);
-        spherePositions[2] = vec3(d * 0, d * 0, z);
-        spherePositions[3] = vec3(d * 1, d * 0, z);
+        spherePositions[0] = v(d * 0, d * 2);
+        spherePositions[1] = v(d * 0, d * 1);
+        spherePositions[2] = v(d * 0, d * 0);
+        spherePositions[3] = v(d * 1, d * 0);
 
-        spherePositions[4] = vec3(d * 3, d * 2, z);
-        spherePositions[5] = vec3(d * 3, d * 1, z);
-        spherePositions[6] = vec3(d * 3, d * 0, z);
-        spherePositions[7] = vec3(d * 4, d * 0, z);
-        spherePositions[8] = vec3(d * 5, d * 0, z);
-        spherePositions[9] = vec3(d * 5, d * 1, z);
-        spherePositions[10] = vec3(d * 5, d * 2, z);
+        spherePositions[4] = v(d * 3, d * 2);
+        spherePositions[5] = v(d * 3, d * 1);
+        spherePositions[6] = v(d * 3, d * 0);
+        spherePositions[7] = v(d * 4, d * 0);
+        spherePositions[8] = v(d * 5, d * 0);
+        spherePositions[9] = v(d * 5, d * 1);
+        spherePositions[10] = v(d * 5, d * 2);
 
-        spherePositions[11] = vec3(d * 7, d * 2, z);
-        spherePositions[12] = vec3(d * 8, d * 2, z);
-        spherePositions[13] = vec3(d * 7, d * 1, z);
-        spherePositions[14] = vec3(d * 7, d * 0, z);
-        spherePositions[15] = vec3(d * 8, d * 0, z);
+        spherePositions[11] = v(d * 7, d * 2);
+        spherePositions[12] = v(d * 8, d * 2);
+        spherePositions[13] = v(d * 7, d * 1);
+        spherePositions[14] = v(d * 7, d * 0);
+        spherePositions[15] = v(d * 8, d * 0);
 
-        spherePositions[16] = vec3(d * 10, d * 2, z);
-        spherePositions[17] = vec3(d * 12, d * 2, z);
-        spherePositions[18] = vec3(d * 10, d * 1, z);
-        spherePositions[19] = vec3(d * 11, d * 1, z);
-        spherePositions[20] = vec3(d * 10, d * 0, z);
-        spherePositions[21] = vec3(d * 12, d * 0, z);
+        spherePositions[16] = v(d * 10, d * 2);
+        spherePositions[17] = v(d * 12, d * 2);
+        spherePositions[18] = v(d * 10, d * 1);
+        spherePositions[19] = v(d * 11, d * 1);
+        spherePositions[20] = v(d * 10, d * 0);
+        spherePositions[21] = v(d * 12, d * 0);
 
-        for(i in 0...22) {
-            spherePositions[i].x -= 6;
-            spherePositions[i].z += sin((iTime + i*0.1)* 5) * 1.0;
-        }
-
+        var ix = iResolution.x;
+        var fc = fragCoord;
         var uv:Vec2;
-        uv.x = (fragCoord.x - iResolution.x * 0.5) / iResolution.x;
-        var h = (iResolution.x * 9/16); // iResolution.y is not correct.
-        uv.y = ((fragCoord.y - h * 0.5) / h) * 0.6;
+        uv.x = (fc.x - ix * 0.5) / ix;
+        var h = ix * 0.56; // iResolution.y is not correct.
+        uv.y = ((fc.y - h * 0.5) / h) * 0.6;
 
         var cameraPosition = vec3(0, 0, 0.0);
         var cameraDirection = normalize(vec3(uv, -1.0));
@@ -78,13 +78,15 @@ class MyShader extends ShaderMain {
         var origin = cameraPosition;
         var direction = cameraDirection;
         var t = 1.0;
-        var collides = false;
-        var first = true;
+        var collides = 0;
+        var first = 1;
 
-        for(i in 0...10) {
+        for(i in 0...9) {
             for(i in 0...22) {
                 var sphere_position = spherePositions[i];
-                var sphere_color = vec3(0.5, 0.2, sphere_position.y / 3.0);
+                sphere_position.x -= 6;
+                sphere_position.z = -15 + sin((iTime + i*0.1)* 5) * 1;
+                var sphere_color = vec3(0.5, 0.2, sphere_position.y / 3);
                 var t = intersectSphere(origin, direction, sphere_position, sphere_radius);
 
                 if(t > 0.01) {
@@ -93,26 +95,25 @@ class MyShader extends ShaderMain {
                     direction = reflect(direction, normal);
                     var d = dot(cameraDirection, normal) * -1.0;
 
-                    // col.x += 0.4 * d;
-                    if(first) {
+                    if(first == 1) {
                         var d = dot(cameraDirection, normal) * -1.0;
                         col = sphere_color * 0.3 + sphere_color * d * 0.5;
-                        first = false;
+                        first = 0;
                     } else {
                         col = mix(col, sphere_color, 0.3);
                     }
 
-                    collides = true;
+                    collides = 1;
                     break;
                 }
             }
 
-            if(!collides) {
+            if(collides == 0) {
                 break;
             }
         }
 
-        if(collides) {
+        if(collides == 1) {
             fragColor = vec4(col, 1.0);
             return;
         }
@@ -134,7 +135,7 @@ class MyShader extends ShaderMain {
         // }
 
         var c = uv.xy * uv.xy * sin(uv.x * 5 + iTime) * sin(uv.y * 7 + iTime) + uv.x * sin(iTime) * 0.3 + uv.y * sin(iTime) * 0.2;
-        var b = sqrt(abs(c.x + c.y) * 20) * 3;
+        var b = sqrt(abs(c.x + c.y) * 9) * 3;
         fragColor = vec4(0.01, abs(sin(b)-sin(d)) * 0.03, 0.1 + abs(sin(b)) * 0.1, 1.0);
 
         // if(uv.y > 0.5) {

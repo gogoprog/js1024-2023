@@ -13,9 +13,11 @@ build: run
 	for i in {1..4}; do sed '$$d' -i temp/final.frag; done
 	sed -i 's/vec4 fragColor/out vec4 fragColor/' temp/final.frag
 	cat src/before.html > build/index.html
-	cat temp/final.frag >> build/index.html
+	# cat temp/final.frag >> build/index.html
+	mono deps/shader_minifier.exe --format text temp/final.frag -o temp/min.frag
+	cat temp/min.frag >> build/index.html
 	cat src/after.html >> build/index.html
-	stat temp/final.frag | grep Size
+	stat temp/min.frag | grep Size
 
 retail: compile
 	mkdir -p retail
