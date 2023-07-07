@@ -30,7 +30,6 @@ class MyShader extends ShaderMain {
 
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
 
-
         var spherePositions:Array<Vec3, 22>;
         final d = 1.0;
         final z = -15.0;
@@ -61,7 +60,6 @@ class MyShader extends ShaderMain {
         spherePositions[20] = vec3(d * 10, d * 0, z);
         spherePositions[21] = vec3(d * 12, d * 0, z);
 
-
         for(i in 0...22) {
             spherePositions[i].x -= 6;
             spherePositions[i].z += sin((iTime + i*0.1)* 5) * 1.0;
@@ -81,6 +79,7 @@ class MyShader extends ShaderMain {
         var direction = cameraDirection;
         var t = 1.0;
         var collides = false;
+        var first = true;
 
         for(i in 0...10) {
             for(i in 0...22) {
@@ -93,15 +92,22 @@ class MyShader extends ShaderMain {
                     var normal = normalize(origin - sphere_position);
                     direction = reflect(direction, normal);
                     var d = dot(cameraDirection, normal) * -1.0;
+
                     // col.x += 0.4 * d;
-                    col = mix(col, sphere_color, 0.3);
+                    if(first) {
+                        var d = dot(cameraDirection, normal) * -1.0;
+                        col = sphere_color * 0.3 + sphere_color * d * 0.5;
+                        first = false;
+                    } else {
+                        col = mix(col, sphere_color, 0.3);
+                    }
+
                     collides = true;
                     break;
                 }
             }
 
-            if(t > 0.01) {
-            } else {
+            if(!collides) {
                 break;
             }
         }
@@ -127,7 +133,9 @@ class MyShader extends ShaderMain {
         //     }
         // }
 
-        fragColor = vec4(0.1, 0.2 + mod(uv.y * 20 + iTime, 0.5), 0.3 + mod(uv.x * 30, 0.5), 1.0);
+        var c = uv.xy * uv.xy * sin(uv.x * 5 + iTime) * sin(uv.y * 7 + iTime) + uv.x * sin(iTime) * 0.3 + uv.y * sin(iTime) * 0.2;
+        var b = sqrt(abs(c.x + c.y) * 20) * 3;
+        fragColor = vec4(0.01, abs(sin(b)-sin(d)) * 0.03, 0.1 + abs(sin(b)) * 0.1, 1.0);
 
         // if(uv.y > 0.5) {
         //     fragColor = vec4(1, 0, 0, 1);
