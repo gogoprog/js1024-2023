@@ -29,7 +29,7 @@ class MyShader extends ShaderMain {
     final lightPosition = vec3(0.0, 1.0, -5.0);
 
     function v2(x:Int):Vec3 {
-        return vec3(floor(x / 10), mod(x,10), 0);
+        return vec3(floor(x / 10), mod(x, 10), 0);
     }
 
     function mainImage(fragColor:Vec4, fragCoord:Vec2):Void {
@@ -64,10 +64,8 @@ class MyShader extends ShaderMain {
         spherePositions[20] = v2(100);
         spherePositions[21] = v2(120);
 
-        var uv:Vec2;
-        uv.x = (fragCoord.x - ix * 0.5) / ix;
         var h = ix * 0.56; // iResolution.y is not correct.
-        uv.y = ((fragCoord.y - h * 0.5) / h) * 0.6;
+        var uv:Vec2 = vec2((fragCoord.x - ix * 0.5) / ix, ((fragCoord.y - h * 0.5) / h) * 0.6);
 
         var cameraPosition = vec3(0, 0, 0.0);
         var cameraDirection = normalize(vec3(uv, -1.0));
@@ -85,7 +83,14 @@ class MyShader extends ShaderMain {
                 sphere_position.x -= 6;
                 sphere_position.z = -15 + sin((tt + i*0.1)* 5) * 1;
                 var sphere_color = vec3(0.5, 0.2, sphere_position.y / 3);
-                var t = intersectSphere(origin, direction, sphere_position, sphere_radius);
+                // var t = intersectSphere(origin, direction, sphere_position, sphere_radius);
+                var oc = vec3(origin - sphere_position);
+                var a = dot(direction, direction);
+                var b = 2.0 * dot(oc, direction);
+                var c = dot(oc, oc) - (sphere_radius * sphere_radius);
+                var discriminant = b * b - 4.0 * a * c;
+                var sqrtDiscriminant = sqrt(discriminant);
+                var t = (-b - sqrtDiscriminant) / (2.0 * a);
 
                 if(t > 0.1) {
                     origin = origin + direction * t;
@@ -109,30 +114,13 @@ class MyShader extends ShaderMain {
             }
         }
 
-        if(collides == 1) {
-            fragColor = vec4(col, 1.0);
-            return;
+        if(collides == 0) {
+            var c = uv.xy * uv.xy * sin(uv.x * 5 + tt) * sin(uv.y * 7 + tt) + uv.x * sin(tt) * 0.3 + uv.y * sin(tt) * 0.2;
+            var b = sqrt(abs(c.x + c.y) * 9) * 3;
+            col = vec3(0.01, abs(sin(b)) /30, 0.1 + abs(sin(b)) /9);
         }
 
-        // for(i in 0...22) {
-        //     var sphere_position = spherePositions[i];
-        //     sphere_position.z += sin((tt + i*0.1)* 5) * 1.0;
-        //     var t = intersectSphere(cameraPosition, cameraDirection, sphere_position, sphere_radius);
-        //     if(t > 0.0) {
-        //         var pos = cameraPosition + cameraDirection * t;
-        //         var normal = normalize(pos - sphere_position);
-        //         var d = dot(cameraDirection, normal) * -1.0;
-        //         // fragColor = vec4(0.1 + (0.5 + normal.z), 0.0, 0.0, 1.0);
-        //         var color = normal * 0.5 + vec3(0.5, 0.5, 0.5);
-        //         // fragColor = vec4(color.x,color.y, color.z , 1.0);
-        //         fragColor = vec4(d, d, d, 1.0);
-        //         return;
-        //     }
-        // }
-
-        var c = uv.xy * uv.xy * sin(uv.x * 5 + tt) * sin(uv.y * 7 + tt) + uv.x * sin(tt) * 0.3 + uv.y * sin(tt) * 0.2;
-        var b = sqrt(abs(c.x + c.y) * 9) * 3;
-        fragColor = vec4(0.01, abs(sin(b)) /30, 0.1 + abs(sin(b)) /9, 1.0);
+        fragColor = vec4(col, 1.0);
 
         // if(uv.y > 0.5) {
         //     fragColor = vec4(1, 0, 0, 1);
@@ -145,31 +133,8 @@ class MyShader extends ShaderMain {
         var b = 2.0 * dot(oc, ray_direction);
         var c = dot(oc, oc) - (sphere_radius * sphere_radius);
         var discriminant = b * b - 4.0 * a * c;
-        var t = -1.0;
-
-        if(discriminant < 0.0) {
-            t = -1.0;
-        }
-
         var sqrtDiscriminant = sqrt(discriminant);
-        var t0 = (-b - sqrtDiscriminant) / (2.0 * a);
-        var t1 = (-b + sqrtDiscriminant) / (2.0 * a);
-
-        if(t0 > t1) {
-            var temp = t0;
-            t0 = t1;
-            t1 = temp;
-        }
-
-        if(t1 < 0.0) {
-            t = -1.0;
-        }
-
-        if(t0 < 0.0) {
-            t = t1;
-        } else {
-            t = t0;
-        }
+        var t = (-b - sqrtDiscriminant) / (2.0 * a);
 
         return t;
     }
